@@ -1,6 +1,6 @@
 import asyncio
 
-from inocloudreve import CloudreveClient
+from src.inocloudreve import CloudreveClient
 
 async def main():
     client = CloudreveClient("https://drive.likenesslabs.com/api/v4", "spark@likenesslabs.com", "9U3strQen3tWgxC")
