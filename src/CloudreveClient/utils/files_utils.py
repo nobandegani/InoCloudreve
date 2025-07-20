@@ -1,12 +1,14 @@
 import os
 import httpx
+import aiofiles
 
 async def save_url_as_file(
     self,
     url: str,
     save_dir: str,
     filename: str,
-    extension: str
+    extension: str,
+    overwrite: bool = True
 ) -> dict:
     """
     Download a file from `url` and save it to `save_dir/filename+extension`.
@@ -17,6 +19,7 @@ async def save_url_as_file(
         save_dir: directory path to save the file (string)
         filename: base name for the saved file (string)
         extension: file extension including the dot, e.g. ".zip" or ".png" (string)
+        overwrite: if False and file exists, abort with error (bool, default True)
 
     Returns:
         {
@@ -31,16 +34,23 @@ async def save_url_as_file(
     os.makedirs(save_dir, exist_ok=True)
     file_path = os.path.join(save_dir, f"{filename}{extension}")
 
+    if not overwrite and os.path.exists(file_path):
+        return {
+            "success": False,
+            "status_code": None,
+            "code": None,
+            "msg": f"File already exists at {file_path}",
+            "path": file_path
+        }
+
     try:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(url)
-            resp.raise_for_status()
+        resp = await self.conn.get(url)
+        resp.raise_for_status()
     except httpx.RequestError as exc:
         return {
             "success": False,
             "status_code": None,
             "msg": f"Request error: {exc}",
-            "code": None,
             "path": ""
         }
     except httpx.HTTPStatusError as exc:
@@ -48,19 +58,17 @@ async def save_url_as_file(
             "success": False,
             "status_code": exc.response.status_code,
             "msg": f"HTTP error: {exc.response.status_code}",
-            "code": exc.response.status_code,
             "path": ""
         }
 
     try:
-        with open(file_path, "wb") as f:
-            f.write(resp.content)
+        async with aiofiles.open(file_path, "wb") as f:
+            res = await f.write(resp.content)
     except OSError as exc:
         return {
             "success": False,
             "status_code": resp.status_code,
             "msg": f"File write error: {exc}",
-            "code": resp.status_code,
             "path": ""
         }
 
@@ -68,6 +76,38 @@ async def save_url_as_file(
         "success": True,
         "status_code": resp.status_code,
         "msg": "",
-        "code": resp.status_code,
         "path": file_path
     }
+
+
+async def read_file_as_bytes(path: str) -> dict:
+    """
+    Read a file from disk and return its bytes and size.
+
+    Args:
+        path: path to the file as a string
+
+    Returns:
+        {
+            "success": bool,
+            "msg": str,
+            "data": bytes,
+            "size": int
+        }
+    """
+    try:
+        async with aiofiles.open(path, "rb") as f:
+            data = await f.read()
+        return {
+            "success": True,
+            "msg": "",
+            "data": data,
+            "size": len(data),
+        }
+    except Exception as exc:
+        return {
+            "success": False,
+            "msg": f"Error reading file: {exc}",
+            "data": b"",
+            "size": 0,
+        }
