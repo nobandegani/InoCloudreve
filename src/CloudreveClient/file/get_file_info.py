@@ -5,6 +5,7 @@ async def get_file_info(
     file: str,
     extended: bool | None = None,
     folder_summary: bool | None = None,
+    init_uri: str = "cloudreve://my/"
 ) -> dict:
     """
     Fetch file information from the /file/info endpoint.
@@ -14,6 +15,7 @@ async def get_file_info(
         file: the file URI or file ID (string)
         extended: include extended metadata (bool, optional)
         folder_summary: include folder summary (bool, optional)
+        init_uri: initial URI (string, default "cloudreve://my/")
 
     Returns a dict:
         {
@@ -39,7 +41,7 @@ async def get_file_info(
     params = {}
 
     if "/" in file or "\\" in file:
-        params["uri"] = "cloudreve://my/" + file
+        params["uri"] = init_uri + file
     else:
         params["id"] = file
 
