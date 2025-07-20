@@ -10,6 +10,7 @@ from .file import create_download_url as _create_download_url
 from .file import get_download_url as _get_download_url
 from .file import update_file_content as _update_file_content
 from .file import list_files as _list_files
+from .file import create_upload_session as _create_upload_session
 
 from .utils import is_token_valid as _is_token_valid
 from .utils import validate_token as _validate_token
@@ -34,6 +35,7 @@ class CloudreveClient:
     create_download_url = _create_download_url
     get_download_url = _get_download_url
     update_file_content = _update_file_content
+    create_upload_session = _create_upload_session
 
     is_token_valid = _is_token_valid
     validate_token = _validate_token
