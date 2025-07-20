@@ -10,6 +10,7 @@ async def create_download_url(
     skip_error: bool | None = None,
     archive: bool | None = None,
     no_cache: bool | None = None,
+    init_uri: str = "cloudreve://my/"
 ) -> dict:
     """
     Create signed download URLs via POST /file/url.
@@ -24,6 +25,7 @@ async def create_download_url(
         skip_error: skip missing files silently (bool, optional)
         archive: archive files into zip (bool, optional)
         no_cache: disable CDN caching (bool, optional)
+        init_uri: initial URI (string, default "cloudreve://my/")
 
     Returns:
         {
@@ -43,6 +45,20 @@ async def create_download_url(
             "msg": "Access token expired"
         }
 
+    file_names: list[str] = []
+    extensions: list[str] = []
+    for uri in uris:
+        name = uri.rstrip('/').split('/')[-1]
+
+        if '.' in name and not name.startswith('.'):
+            base, ext = name.rsplit('.', 1)
+            file_names.append(base)
+            extensions.append(f'.{ext}')
+        else:
+            file_names.append(name)
+            extensions.append('.zip')
+
+    uris = [f"{init_uri}{u}" for u in uris]
     headers = {"Authorization": f"Bearer {self.token.get('access_token', '')}"}
 
     payload = {}
@@ -98,5 +114,7 @@ async def create_download_url(
         "msg": payload.get("msg", ""),
         "code": code,
         "urls": data.get("urls", {}),
+        "file_names": file_names,
+        "extensions": extensions,
         "expires": data.get("expires", "")
     }
