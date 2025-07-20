@@ -27,10 +27,10 @@ Supports authentication, file operations, token management, and utilities—buil
 ## Installation
 
 ```bash
-# From PyPI (if published)
-pip install cloudreve-client
+# Install from PyPI
+pip install InoCloudreve
 
-# Or install in editable mode from your local clone:
+# install locally:
 git clone https://github.com/nobandegani/InoCloudreve.git
 cd InoCloudreve
 pip install -e .

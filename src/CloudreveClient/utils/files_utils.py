@@ -61,9 +61,28 @@ async def save_url_as_file(
             "path": ""
         }
 
+    content = resp.content
+    if not content:
+        return {
+            "success": False,
+            "status_code": resp.status_code,
+            "msg": "Empty response body",
+            "path": ""
+        }
+
+    ct = resp.headers.get("Content-Type", "")
+    if not ct.startswith("application/") and not ct.startswith("image/") and not ct.startswith(
+            "application/octet-stream"):
+        return {
+            "success": False,
+            "status_code": resp.status_code,
+            "msg": f"Unexpected content-type: {ct}",
+            "path": ""
+        }
+
     try:
         async with aiofiles.open(file_path, "wb") as f:
-            res = await f.write(resp.content)
+            await f.write(resp.content)
     except OSError as exc:
         return {
             "success": False,
