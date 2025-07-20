@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "InoCloudreve"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
   { name="Inoland", email="contact@inoland.net" },
 ]
@@ -18,7 +18,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "httpx"
+    "httpx",
+    "aiofiles"
 ]
 license = "MPL-2.0"
 license-files = ["LICENSE"]
