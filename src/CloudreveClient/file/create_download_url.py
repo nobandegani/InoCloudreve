@@ -65,19 +65,19 @@ async def create_download_url(
 
     payload["uris"] = uris
 
-    if download:
+    if download is not None:
         payload["download"] = download
-    if redirect:
+    if redirect is not None:
         payload["redirect"] = redirect
     if entity is not None:
         payload["entity"] = entity
-    if use_primary_site_url:
+    if use_primary_site_url is not None:
         payload["use_primary_site_url"] = use_primary_site_url
-    if skip_error:
+    if skip_error is not None:
         payload["skip_error"] = skip_error
-    if archive:
+    if archive is not None:
         payload["archive"] = archive
-    if no_cache:
+    if no_cache is not None:
         payload["no_cache"] = no_cache
 
     try:

@@ -43,9 +43,9 @@ async def get_file_info(
     else:
         params["id"] = file
 
-    if extended:
+    if extended is not None:
         params["extended"] = extended
-    if folder_summary:
+    if folder_summary is not None:
         params["folder_summary"] = folder_summary
 
     try:
