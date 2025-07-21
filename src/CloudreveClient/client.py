@@ -25,12 +25,17 @@ from .utils import read_file_as_bytes as _read_file_as_bytes
 from .utils import get_headers as _get_headers
 
 class CloudreveClient:
-    def __init__(self, base_url: str, email: str, password: str):
-        self.conn = httpx.AsyncClient(base_url=base_url.rstrip('/'))
-        self.email = email
-        self.password = password
+    def __init__(self):
+        self.base_url = None
+        self.conn = None
+        self.email = None
+        self.password = None
         self.user_info= None
         self.token = None
+
+    def init(self, base_url: str):
+        self.base_url = base_url.rstrip('/')
+        self.conn = httpx.AsyncClient(base_url=self.base_url)
 
     ping = _ping
 

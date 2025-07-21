@@ -2,6 +2,8 @@ import httpx
 
 async def password_sign_in(
         self,
+        email: str,
+        password: str,
         captcha: str = None,
         ticket: str = None,
 ) -> dict:
@@ -18,8 +20,8 @@ async def password_sign_in(
         }
     """
 
-    email = self.email
-    password = self.password
+    self.email = email
+    self.password = password
 
     payload = {"email": email, "password": password}
 
