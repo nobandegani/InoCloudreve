@@ -33,24 +33,16 @@ async def delete_file(
             "msg": "Access token expired"
         }
 
-    # Build the full URIs list
     full_uris = [f"{init_uri}{u}" for u in uris]
 
-    # Use the purchase ticket header as per docs
-    headers = {
-        "Authorization": f"Bearer {self.token.get('access_token', '')}",
-        "Content-Type": "application/json",
-    }
-
-    body = {
-        "uris": full_uris,
-        "unlink": unlink,
-        "skip_soft_delete": skip_soft_delete
-    }
-
+    payload = {"uris": full_uris}
+    if unlink is not None:
+        payload["unlink"] = unlink
+    if skip_soft_delete is not None:
+        payload["skip_soft_delete"] = skip_soft_delete
 
     try:
-        resp = await self.conn.request("DELETE", "/file", json=body, headers=headers)
+        resp = await self.conn.request("DELETE", "/file", json=payload, headers=self.get_headers())
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

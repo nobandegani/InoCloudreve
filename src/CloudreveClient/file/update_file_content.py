@@ -34,10 +34,8 @@ async def update_file_content(
             "data": {},
         }
 
-    headers = {
-        "Authorization": f"Bearer {self.token.get('access_token', '')}",
-        "Content-Length": str(len(content)),
-    }
+    headers = self.get_headers(True, False)
+    headers["Content-Length"] = str(len(content))
 
     params = {"uri": "cloudreve://my/" + file_uri}
 

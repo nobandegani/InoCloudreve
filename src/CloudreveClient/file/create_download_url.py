@@ -59,7 +59,6 @@ async def create_download_url(
             extensions.append('.zip')
 
     uris = [f"{init_uri}{u}" for u in uris]
-    headers = {"Authorization": f"Bearer {self.token.get('access_token', '')}"}
 
     payload = {}
 
@@ -81,7 +80,7 @@ async def create_download_url(
         payload["no_cache"] = no_cache
 
     try:
-        resp = await self.conn.post("/file/url", json=payload, headers=headers)
+        resp = await self.conn.post("/file/url", json=payload, headers=self.get_headers())
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

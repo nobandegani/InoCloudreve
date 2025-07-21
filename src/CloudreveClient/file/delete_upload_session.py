@@ -32,11 +32,10 @@ async def delete_upload_session(
             "msg": "Access token expired"
         }
 
-    headers = {"Authorization": f"Bearer {self.token.get('access_token', '')}"}
-    params = {"id": session_id, "uri": init_uri + uri}
-    print (params)
+    payload = {"id": session_id, "uri": init_uri + uri}
+
     try:
-        resp = await self.conn.delete("/file/upload", params=params, headers=headers)
+        resp = await self.conn.request("DELETE", "/file/upload", json=payload, headers=self.get_headers())
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

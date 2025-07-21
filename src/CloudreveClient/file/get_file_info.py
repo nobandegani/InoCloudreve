@@ -34,10 +34,6 @@ async def get_file_info(
             "msg": "Access token expired"
         }
 
-    headers = {
-        "Authorization": f"Bearer {self.token.get('access_token', '')}"
-    }
-
     params = {}
 
     if "/" in file or "\\" in file:
@@ -51,7 +47,7 @@ async def get_file_info(
         params["folder_summary"] = folder_summary
 
     try:
-        resp = await self.conn.get("/file/info", params=params, headers=headers)
+        resp = await self.conn.get("/file/info", params=params, headers=self.get_headers(True, False))
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

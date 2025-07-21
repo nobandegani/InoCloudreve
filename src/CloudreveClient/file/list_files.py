@@ -40,9 +40,6 @@ async def list_files(
             "data": {},
         }
 
-
-    headers = {"Authorization": f"Bearer {self.token.get('access_token', '')}"}
-
     params = {
         "uri": "cloudreve://my/" + uri,
         "page": page,
@@ -59,7 +56,7 @@ async def list_files(
         params["next_page_token"] = next_page_token
 
     try:
-        resp = await self.conn.get("/file", params=params, headers=headers)
+        resp = await self.conn.get("/file", params=params, headers=self.get_headers(True, False))
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

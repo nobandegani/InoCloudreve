@@ -4,5 +4,15 @@ from .create_download_url_utils import get_download_url
 from .update_file_content   import update_file_content
 from .list_files import list_files
 from .create_upload_session import create_upload_session
+from .delete_upload_session import delete_upload_session
+from .delete_file import delete_file
 
-__all__ = ["get_file_info", "create_download_url", "get_download_url", "update_file_content", "list_files", "create_upload_session"]
+__all__ = [
+    "get_file_info",
+    "create_download_url",
+    "get_download_url",
+    "update_file_content",
+    "list_files",
+    "create_upload_session",
+    "delete_upload_session",
+    "delete_file"]

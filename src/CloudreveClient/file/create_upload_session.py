@@ -55,7 +55,6 @@ async def create_upload_session(
             "callback_secret": ""
         }
 
-    headers = {"Authorization": f"Bearer {self.token.get('access_token','')}"}
     payload = {"uri": init_uri + uri, "size": size, "policy_id": policy_id}
 
     if last_modified is not None:
@@ -68,7 +67,7 @@ async def create_upload_session(
         payload["entity_type"] = entity_type
 
     try:
-        resp = await self.conn.put("/file/upload", json=payload, headers=headers)
+        resp = await self.conn.put("/file/upload", json=payload, headers=self.get_headers())
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {
