@@ -29,7 +29,12 @@ async def get_last_folder_or_file(
     """
 
     final_uri = uri + "?type=" + file_type
-    result = await self.list_files(final_uri, 0, 50, order_by, order_direction)
+    result = await self.list_files(
+        uri=final_uri,
+        page=0,
+        page_size=50,
+        order_by=order_by,
+        order_direction=order_direction)
     if not result["success"]:
         return {
             "success": result["success"],

@@ -5,7 +5,12 @@ async def get_download_url(
     archive: bool | None = None,
     no_cache: bool | None = None,
 ) -> dict:
-    result = await self.create_download_url([uri], True, None, None, None, None, archive, no_cache)
+    result = await self.create_download_url(
+        uris=[uri],
+        download=True,
+        archive=archive,
+        no_cache=no_cache
+    )
 
     if not result["success"]:
         return {
