@@ -16,20 +16,33 @@ Supports authentication, file operations, token management, and utilities—buil
 ---
 ## Features
 
-- **Health check** (`ping`)  
-- **Authentication**  
-  - `password_sign_in(email, password, ...)`  
-  - `refresh_token(token)`  
-  - `is_token_valid()` / `validate_token()`  
-- **File operations**  
-  - `list_files(uri, page, page_size, …)`  
-  - `get_file_info(file_uri, file_id, …)`  
-  - `get_download_url(uris, download, archive, …)`  
-  - `update_file_content(file_uri, content, previous)`  
-- **Download & save**  
-  - `save_url_as_file(url, save_dir, filename, extension, overwrite)`  
-- **Utilities**  
+- **Health check** (`ping()`)
+
+- **Authentication**
+  - `password_sign_in(email, password, captcha=None, ticket=None)`
+  - `refresh_token(refresh_token)`
+  - `is_token_valid()`
+  - `validate_token()`
+
+- **File operations**
+  - `list_files(uri, page=0, page_size=50, order_by="created_at", order_direction="asc", next_page_token=None)`
+  - `get_file_info(file_uri, file_id, extended=False, folder_summary=False)`
+  - `create_download_url(uris, download=False, redirect=False, entity=None, use_primary_site_url=False, skip_error=False, archive=False, no_cache=False)`
+  - `get_download_url(uris, download=False, redirect=False, entity=None, use_primary_site_url=False, skip_error=False, archive=False, no_cache=False)`
+  - `update_file_content(file_uri, content, previous=None)`
+  - `create_upload_session(uri, filename, size, chunk_size, expire_in, ...)`
+  - `delete_upload_session(id, uri)`
+  - `delete_file(uris, unlink=False, skip_soft_delete=False)`
+  - `force_unlock(tokens)`
+  - `get_last_folder_or_file(uri)`
+
+- **Download & save**
+  - `save_url_as_file(url, save_dir, filename, extension, overwrite=True)`
+
+- **Utilities**
   - `read_file_as_bytes(path)`
+  - `get_headers(include_auth=True, include_content_type=True)`
+
 
 ---
 
