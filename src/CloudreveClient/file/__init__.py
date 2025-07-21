@@ -6,6 +6,7 @@ from .list_files import list_files
 from .create_upload_session import create_upload_session
 from .delete_upload_session import delete_upload_session
 from .delete_file import delete_file
+from .force_unlock import force_unlock
 
 __all__ = [
     "get_file_info",
@@ -15,4 +16,5 @@ __all__ = [
     "list_files",
     "create_upload_session",
     "delete_upload_session",
-    "delete_file"]
+    "delete_file",
+    "force_unlock"]
