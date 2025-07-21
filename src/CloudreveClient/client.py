@@ -4,6 +4,8 @@ from .site import ping as _ping
 
 from .session import password_sign_in as _password_sign_in
 from .session import refresh_token as _refresh_token
+from .session import generate_token as _generate_token
+from .session import decode_token as _decode_token
 
 from .file import get_file_info as _get_file_info
 from .file import create_download_url as _create_download_url
@@ -34,6 +36,8 @@ class CloudreveClient:
 
     password_sign_in = _password_sign_in
     refresh_token = _refresh_token
+    generate_token = _generate_token
+    decode_token = _decode_token
 
     list_files = _list_files
     get_file_info = _get_file_info

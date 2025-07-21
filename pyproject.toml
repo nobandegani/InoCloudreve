@@ -19,7 +19,8 @@ classifiers = [
 ]
 dependencies = [
     "httpx",
-    "aiofiles"
+    "aiofiles",
+    "pyjwt"
 ]
 license = "MPL-2.0"
 license-files = ["LICENSE"]
