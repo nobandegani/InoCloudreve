@@ -17,9 +17,12 @@ async def password_sign_in(
             "token": dict
         }
     """
+
     email = self.email
     password = self.password
+
     payload = {"email": email, "password": password}
+
     if captcha is not None:
         payload["captcha"] = captcha
     if ticket is not None:
