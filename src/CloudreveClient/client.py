@@ -14,6 +14,7 @@ from .file import create_upload_session as _create_upload_session
 from .file import delete_upload_session as _delete_upload_session
 from .file import delete_file as _delete_file
 from .file import force_unlock as _force_unlock
+from .file import get_last_folder_or_file as _get_last_folder_or_file
 
 from .utils import is_token_valid as _is_token_valid
 from .utils import validate_token as _validate_token
@@ -43,6 +44,7 @@ class CloudreveClient:
     delete_upload_session = _delete_upload_session
     delete_file = _delete_file
     force_unlock = _force_unlock
+    get_last_folder_or_file = _get_last_folder_or_file
 
     is_token_valid = _is_token_valid
     validate_token = _validate_token

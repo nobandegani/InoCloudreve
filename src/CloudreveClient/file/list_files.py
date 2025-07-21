@@ -8,6 +8,7 @@ async def list_files(
     order_by: str | None = None,
     order_direction: str | None = None,
     next_page_token: str | None = None,
+    init_uri: str = "cloudreve://my/"
 ) -> dict:
     """
     List files via GET /file.
@@ -20,6 +21,7 @@ async def list_files(
         order_by: field to order by (string, default "created_at")
         order_direction: sort direction ("asc" or "desc", default "asc")
         next_page_token: cursor for next page (string, optional)
+        init_uri: initial URI (string, default "cloudreve://my/")
 
     Returns:
         {
@@ -41,7 +43,7 @@ async def list_files(
         }
 
     params = {
-        "uri": "cloudreve://my/" + uri,
+        "uri": init_uri + uri,
         "page": page,
         "page_size": page_size
     }
@@ -88,12 +90,29 @@ async def list_files(
 
     code = payload.get("code", -1)
     data = payload.get("data", {})
+    files = data.get("files", [])
+    num_files = sum(1 for it in files if it.get("type") == 0)
+    num_folders = sum(1 for it in files if it.get("type") == 1)
 
-    # 5) Return structured result
+    parent = data.get("parent", {})
+    pagination = data.get("pagination", {})
+    props = data.get("props", {})
+    context_hint = data.get("context_hint", {})
+    mixed_type = data.get("mixed_type", {})
+    storage_policy = data.get("storage_policy", {})
+
     return {
         "success": code == 0,
         "status_code": resp.status_code,
         "msg": payload.get("msg", ""),
         "code": code,
-        "data": data,
+        "num_files": num_files,
+        "num_folders": num_folders,
+        "files": files,
+        "parent": parent,
+        "pagination": pagination,
+        "props": props,
+        "context_hint": context_hint,
+        "mixed_type": mixed_type,
+        "sotrage_policy": storage_policy
     }
