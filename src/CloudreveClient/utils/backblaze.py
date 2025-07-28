@@ -77,7 +77,82 @@ async def b2_list_folders(
                 "folders": []
             }
 
+async def b2_list_multipart_uploads(
+    self,
+    prefix: str | None = None,
+    access_key_id: str | None = None,
+    access_key_secret: str | None = None,
+    region: str | None = None,
+    bucket_name: str | None = None,
+) -> dict:
+    """
+    List active multipart uploads in your B2 bucket.
 
+    Args:
+      self: CloudreveClient instance
+      prefix: only list uploads whose key starts with this (optional)
+      access_key_id: your b2 access id
+      access_key_secret: your b2 access secret
+      region: B2 region (uses self.b2_region if None)
+      bucket_name: B2 bucket name (uses self.b2_bucket_name if None)
+
+    Returns:
+      {
+        "success": bool,
+        "status_code": int | None,
+        "msg": str,
+        "uploads": [  # list of dicts with UploadId, Key, Initiator, etc.
+          {
+            "UploadId": str,
+            "Key": str,
+            "Initiated": datetime,
+            ...
+          }, …
+        ]
+      }
+    """
+    if access_key_id is None:
+        access_key_id = self.b2_access_key_id
+
+    if access_key_secret is None:
+        access_key_secret = self.b2_access_key_secret
+
+    if region is None:
+        region = self.b2_region
+
+    if bucket_name is None:
+        bucket_name = self.b2_bucket_name
+
+    endpoint    = f"https://s3.{region}.backblazeb2.com"
+
+    session     = aiobotocore.session.get_session()
+
+    async with session.create_client(
+        "s3",
+        region_name=region,
+        endpoint_url=endpoint,
+        aws_access_key_id=access_key_id,
+        aws_secret_access_key=access_key_secret,
+    ) as s3:
+        try:
+            resp = await s3.list_multipart_uploads(
+                Bucket=bucket_name,
+                Prefix=prefix or ""
+            )
+            uploads = resp.get("Uploads", [])
+            return {
+                "success": True,
+                "status_code": 200,
+                "msg": "",
+                "uploads": uploads
+            }
+        except Exception as exc:
+            return {
+                "success": False,
+                "status_code": None,
+                "msg": f"Error listing multipart uploads: {exc}",
+                "uploads": []
+            }
 
 
 

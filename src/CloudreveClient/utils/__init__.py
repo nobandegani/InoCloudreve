@@ -6,8 +6,9 @@ from .files_utils import read_file_as_bytes
 
 from .backblaze import b2_upload_part
 from .backblaze import b2_list_folders
+from .backblaze import b2_list_multipart_uploads
 
 from .http import get_headers
 
 
-__all__ = ["validate_token", "is_token_valid", "save_url_as_file", "read_file_as_bytes", "get_headers", "b2_upload_part"]
+__all__ = ["validate_token", "is_token_valid", "save_url_as_file", "read_file_as_bytes", "get_headers", "b2_upload_part", "b2_list_folders", "b2_list_multipart_uploads"]
