@@ -23,6 +23,7 @@ from .utils import validate_token as _validate_token
 from .utils import save_url_as_file as _save_url_as_file
 from .utils import read_file_as_bytes as _read_file_as_bytes
 from .utils import get_headers as _get_headers
+from .utils import b2_upload_part as _b2_upload_part
 
 class CloudreveClient:
     def __init__(self):
@@ -32,10 +33,14 @@ class CloudreveClient:
         self.password = None
         self.user_info= None
         self.token = None
+        self.region = None
+        self.bucket_name = None
 
-    def init(self, base_url: str):
+    def init(self, base_url: str, region: str = "us-west-004", bucket_name: str = "InoDrive"):
         self.base_url = base_url.rstrip('/')
         self.conn = httpx.AsyncClient(base_url=self.base_url)
+        self.region = region
+        self.bucket_name = bucket_name
 
     ping = _ping
 
@@ -60,6 +65,8 @@ class CloudreveClient:
     save_url_as_file = _save_url_as_file
     read_file_as_bytes = _read_file_as_bytes
     get_headers = _get_headers
+
+    b2_upload_part = _b2_upload_part
 
     async def close(self):
         await self.conn.aclose()
