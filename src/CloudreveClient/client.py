@@ -13,6 +13,7 @@ from .file import get_download_url as _get_download_url
 from .file import update_file_content as _update_file_content
 from .file import list_files as _list_files
 from .file import create_upload_session as _create_upload_session
+
 from .file import delete_upload_session as _delete_upload_session
 from .file import delete_file as _delete_file
 from .file import force_unlock as _force_unlock
@@ -23,6 +24,11 @@ from .utils import validate_token as _validate_token
 from .utils import save_url_as_file as _save_url_as_file
 from .utils import read_file_as_bytes as _read_file_as_bytes
 from .utils import get_headers as _get_headers
+
+from .utils import upload_parts_via_presigned_urls as _upload_parts_via_presigned_urls
+from .utils import complete_upload_via_complete_url as _complete_upload_via_complete_url
+from .utils import upload_file as _upload_file
+
 from .utils import b2_upload_part as _b2_upload_part
 from .utils import b2_list_folders as _b2_list_folders
 from .utils import b2_list_multipart_uploads as _b2_list_multipart_uploads
@@ -31,6 +37,7 @@ class CloudreveClient:
     def __init__(self):
         self.base_url = None
         self.conn = None
+        self.timeout = httpx.Timeout(600, read=600, write=600)
         self.email = None
         self.password = None
         self.user_info= None
@@ -42,7 +49,7 @@ class CloudreveClient:
 
     def init(self, base_url: str, b2_access_key_id: str = "", b2_access_key_secret: str = "", b2_region: str = "us-west-004", b2_bucket_name: str = "InoDrive"):
         self.base_url = base_url.rstrip('/')
-        self.conn = httpx.AsyncClient(base_url=self.base_url)
+        self.conn = httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout)
         self.b2_access_key_id = b2_access_key_id
         self.b2_access_key_secret = b2_access_key_secret
         self.b2_region = b2_region
@@ -71,6 +78,10 @@ class CloudreveClient:
     save_url_as_file = _save_url_as_file
     read_file_as_bytes = _read_file_as_bytes
     get_headers = _get_headers
+
+    upload_parts_via_presigned_urls = _upload_parts_via_presigned_urls
+    complete_upload_via_complete_url = _complete_upload_via_complete_url
+    upload_file = _upload_file
 
     b2_upload_part = _b2_upload_part
     b2_list_folders = _b2_list_folders
