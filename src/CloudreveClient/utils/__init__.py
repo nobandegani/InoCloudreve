@@ -14,7 +14,6 @@ from .backblaze import b2_list_multipart_uploads
 
 from .http import get_headers
 
-
 __all__ = [
     "validate_token",
     "is_token_valid",
