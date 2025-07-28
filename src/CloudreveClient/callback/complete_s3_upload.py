@@ -26,7 +26,6 @@ async def complete_s3_upload(
     """
 
     path = f"/callback/s3/{session_id}/{Path(key_id).name.split("_", 1)[0]}"
-    print(path)
 
     try:
         resp = await self.conn.get(path)
