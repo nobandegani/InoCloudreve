@@ -99,11 +99,12 @@ async def save_url_as_file(
     }
 
 
-async def read_file_as_bytes(path: str) -> dict:
+async def read_file_as_bytes(self, path: str) -> dict:
     """
     Read a file from disk and return its bytes and size.
 
     Args:
+        self: CloudreveClient instance
         path: path to the file as a string
 
     Returns:
