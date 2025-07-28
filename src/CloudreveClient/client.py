@@ -24,6 +24,7 @@ from .utils import save_url_as_file as _save_url_as_file
 from .utils import read_file_as_bytes as _read_file_as_bytes
 from .utils import get_headers as _get_headers
 from .utils import b2_upload_part as _b2_upload_part
+from .utils import b2_list_folders as _b2_list_folders
 
 class CloudreveClient:
     def __init__(self):
@@ -71,6 +72,7 @@ class CloudreveClient:
     get_headers = _get_headers
 
     b2_upload_part = _b2_upload_part
+    b2_list_folders = _b2_list_folders
 
     async def close(self):
         await self.conn.aclose()
