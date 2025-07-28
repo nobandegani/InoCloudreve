@@ -1,4 +1,6 @@
 import httpx
+import aiobotocore.session
+
 async def b2_upload_part(
     self,
     object_key: str,
@@ -7,6 +9,8 @@ async def b2_upload_part(
     part_data: bytes,
     region: str | None = None,
     bucket_name: str | None = None,
+    access_key_id: str | None = None,
+    access_key_secret: str | None = None,
 ) -> dict:
     """
     Upload one part of a multipart upload to Backblaze B2 via the S3-compatible API.
@@ -28,32 +32,36 @@ async def b2_upload_part(
         }
     """
     if region is None:
-        region = self.region
+        region = self.b2_region
 
     if bucket_name is None:
-        bucket_name = self.bucket_name
+        bucket_name = self.b2_bucket_name
 
-    url = f"https://s3.{region}.backblazeb2.com/{bucket_name}/{object_key}"
-    params = {"partNumber": part_number, "uploadId": upload_id}
+    if access_key_id is None:
+        access_key_id = self.b2_access_key_id
 
-    try:
-        resp = await self.conn.put(url, params=params, content=part_data)
-        resp.raise_for_status()
-    except httpx.RequestError as exc:
-        return {
-            "success": False,
-            "status_code": None,
-            "msg": f"Upload request error: {exc}"
-        }
-    except httpx.HTTPStatusError as exc:
-        return {
-            "success": False,
-            "status_code": exc.response.status_code,
-            "msg": f"Upload failed with HTTP {exc.response.status_code}"
-        }
+    if access_key_secret is None:
+        access_key_secret = self.b2_access_key_secret
 
-    return {
-        "success": True,
-        "status_code": resp.status_code,
-        "msg": f"Part {part_number} uploaded"
-    }
+    session = aiobotocore.session.get_session()
+
+    url = f'https://s3.{region}.backblazeb2.com'
+
+    async with session.create_client(
+            's3',
+            region_name=region,
+            endpoint_url=url,
+            aws_access_key_id=access_key_id,
+            aws_secret_access_key=access_key_secret,
+    ) as s3:
+        try:
+            await s3.upload_part(
+                Bucket=bucket_name,
+                Key=object_key,
+                UploadId=upload_id,
+                PartNumber=part_number,
+                Body=part_data
+            )
+            return {"success": True, "status_code": 200, "msg": f"Part {part_number} uploaded"}
+        except Exception as e:
+            return {"success": False, "status_code": None, "msg": str(e)}

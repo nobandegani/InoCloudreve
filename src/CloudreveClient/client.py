@@ -33,14 +33,18 @@ class CloudreveClient:
         self.password = None
         self.user_info= None
         self.token = None
-        self.region = None
-        self.bucket_name = None
+        self.b2_access_key_id = None
+        self.b2_access_key_secret = None
+        self.b2_region = None
+        self.b2_bucket_name = None
 
-    def init(self, base_url: str, region: str = "us-west-004", bucket_name: str = "InoDrive"):
+    def init(self, base_url: str, b2_access_key_id: str = "", b2_access_key_secret: str = "", b2_region: str = "us-west-004", b2_bucket_name: str = "InoDrive"):
         self.base_url = base_url.rstrip('/')
         self.conn = httpx.AsyncClient(base_url=self.base_url)
-        self.region = region
-        self.bucket_name = bucket_name
+        self.b2_access_key_id = b2_access_key_id
+        self.b2_access_key_secret = b2_access_key_secret
+        self.b2_region = b2_region
+        self.b2_bucket_name = b2_bucket_name
 
     ping = _ping
 
