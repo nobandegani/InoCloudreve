@@ -1,4 +1,6 @@
 import httpx
+import xml.etree.ElementTree as ET
+from urllib.parse import urlparse, unquote
 
 async def upload_parts_via_presigned_urls(
     self,
@@ -23,12 +25,18 @@ async def upload_parts_via_presigned_urls(
     """
     last_status = None
 
+    etags = []
+
     for idx, (url, chunk) in enumerate(zip(upload_urls, parts), start=1):
         try:
             print(f"Uploading part {idx}/{len(parts)} ({len(chunk)} bytes)…")
             headers = {"Content-Length": str(len(chunk))}
             resp = await self.conn.put(url, content=chunk, headers=headers)
             last_status = resp.status_code
+
+            tag = resp.headers.get("ETag")
+            etags.append(tag)
+
         except httpx.RequestError as exc:
             return {
                 "success": False,
@@ -54,15 +62,18 @@ async def upload_parts_via_presigned_urls(
                 "msg": f"Part {idx} error: {exc!r}"
             }
 
+
     return {
         "success": True,
         "status_code": last_status,
-        "msg": f"Uploaded {len(parts)} parts successfully"
+        "msg": f"Uploaded {len(parts)} parts successfully",
+        "etags": etags
     }
 
 async def complete_upload_via_complete_url(
     self,
     complete_url: str,
+    etags: list[str],
 ) -> dict:
     """
     Complete upload with complete url
@@ -70,6 +81,7 @@ async def complete_upload_via_complete_url(
     Args:
         self: CloudreveClient instance
         complete_url:
+        etags:
 
     Returns:
         {
@@ -78,8 +90,24 @@ async def complete_upload_via_complete_url(
             "msg": str
         }
     """
+    S3_NS = "http://s3.amazonaws.com/doc/2006-03-01/"
+    root = ET.Element("CompleteMultipartUpload", xmlns=S3_NS)
+
+    for idx, tag in enumerate(etags, start=1):
+        part = ET.SubElement(root, "Part")
+        ET.SubElement(part, "ETag").text = tag
+        ET.SubElement(part, "PartNumber").text = str(idx)
+    xml_body = ET.tostring(root, encoding="utf-8", xml_declaration=False)
+
     try:
-        resp = await self.conn.post(complete_url)
+        resp = await self.conn.post(
+            complete_url,
+            headers={
+                "Content-Type": "application/xml",
+                "Content-Length": str(len(xml_body))
+            },
+            content=xml_body
+        )
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {
@@ -93,10 +121,33 @@ async def complete_upload_via_complete_url(
             "status_code": exc.response.status_code,
             "msg": f"HTTP error: {exc.response.status_code}"
         }
+
+    try:
+        tree = ET.fromstring(resp.text)
+
+        bucket = tree.find(f".//{{{S3_NS}}}Bucket").text
+        etag_val = tree.find(f".//{{{S3_NS}}}ETag").text
+        key = tree.find(f".//{{{S3_NS}}}Key").text
+        location = tree.find(f".//{{{S3_NS}}}Location").text
+    except Exception as exc:
+        return {
+            "success": False,
+            "status_code": resp.status_code,
+            "msg": f"Failed to parse XML response: {exc}",
+            "bucket": "",
+            "etag": "",
+            "key": "",
+            "location": ""
+        }
+
     return {
         "success": True,
         "status_code": resp.status_code,
-        "msg": f"Upload completed successfully"
+        "msg": "Upload completed successfully",
+        "bucket": bucket,
+        "etag": etag_val,
+        "key": key,
+        "location": location
     }
 
 async def upload_file(
@@ -138,11 +189,11 @@ async def upload_file(
             "file_resp": file_resp["msg"],
             "session_resp": "",
             "upload_parts_resp": "",
-            "complete_upload_resp": ""
+            "complete_upload_resp": "",
+            "callback_resp": ""
         }
-    file_data = file_resp["data"]
-    total_size = file_resp["size"]
 
+    total_size = file_resp["size"]
     session_resp = await self.create_upload_session(
         uri= remote_path,
         size=total_size,
@@ -154,10 +205,11 @@ async def upload_file(
             "file_resp": file_resp["msg"],
             "session_resp": session_resp["msg"],
             "upload_parts_resp": "",
-            "complete_upload_resp": ""
+            "complete_upload_resp": "",
+            "callback_resp": ""
         }
 
-
+    file_data = file_resp["data"]
     chunk_size = session_resp["chunk_size"]
     file_parts = [
         file_data[offset: min(offset + chunk_size, total_size)]
@@ -176,12 +228,14 @@ async def upload_file(
             "file_resp": file_resp["msg"],
             "session_resp": session_resp["msg"],
             "upload_parts_resp": upload_parts_resp["msg"],
-            "complete_upload_resp": ""
+            "complete_upload_resp": "",
+            "callback_resp": ""
         }
 
     complete_url = session_resp["completeURL"]
     complete_upload_resp = await self.complete_upload_via_complete_url(
-        complete_url= complete_url
+        complete_url= complete_url,
+        etags=upload_parts_resp["etags"]
     )
     if not complete_upload_resp["success"]:
         return {
@@ -190,7 +244,23 @@ async def upload_file(
             "file_resp": file_resp["msg"],
             "session_resp": session_resp["msg"],
             "upload_parts_resp": upload_parts_resp["msg"],
-            "complete_upload_resp": complete_upload_resp["msg"]
+            "complete_upload_resp": complete_upload_resp["msg"],
+            "callback_resp": ""
+        }
+
+    callback_resp = await self.complete_s3_upload(
+        session_id=session_resp["session_id"],
+        key_id=complete_upload_resp["key"],
+    )
+    if not callback_resp["success"]:
+        return {
+            "success": False,
+            "msg": "Failed at callback",
+            "file_resp": file_resp["msg"],
+            "session_resp": session_resp["msg"],
+            "upload_parts_resp": upload_parts_resp["msg"],
+            "complete_upload_resp": complete_upload_resp["msg"],
+            "callback_resp": callback_resp["msg"]
         }
 
     return {
@@ -199,5 +269,6 @@ async def upload_file(
         "file_resp": file_resp["msg"],
         "session_resp": session_resp["msg"],
         "upload_parts_resp": upload_parts_resp["msg"],
-        "complete_upload_resp": complete_upload_resp["msg"]
+        "complete_upload_resp": complete_upload_resp["msg"],
+        "callback_resp": callback_resp["msg"]
     }
