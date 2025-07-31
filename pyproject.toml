@@ -3,8 +3,8 @@ requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "InoCloudreve"
-version = "0.1.3"
+name = "inocloudreve"
+version = "0.1.4"
 authors = [
   { name="Inoland", email="contact@inoland.net" },
 ]
@@ -23,6 +23,10 @@ dependencies = [
 ]
 license = "MPL-2.0"
 license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+where  = ["src"]
+include = ["inocloudreve*"]
 
 [project.urls]
 Homepage = "https://github.com/nobandegani/InoCloudreve"
