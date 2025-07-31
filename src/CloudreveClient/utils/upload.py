@@ -1,6 +1,5 @@
 import httpx
 import xml.etree.ElementTree as ET
-from urllib.parse import urlparse, unquote
 
 async def upload_parts_via_presigned_urls(
     self,

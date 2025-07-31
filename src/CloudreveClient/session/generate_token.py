@@ -1,4 +1,5 @@
-import jwt
+#import jwt
+
 from datetime import datetime, timedelta, timezone
 
 def generate_token(
@@ -37,8 +38,8 @@ def generate_token(
         "nbf": int(now.timestamp()),
     }
 
-    raw = jwt.encode(payload, master_key, algorithm="HS256")
-    token_str = raw if isinstance(raw, str) else raw.decode("utf-8")
+    raw = None#jwt.encode(payload, master_key, algorithm="HS256")
+    token_str = None#raw if isinstance(raw, str) else raw.decode("utf-8")
 
     token = {
         "access_token": token_str,
