@@ -32,10 +32,6 @@ from .utils import upload_parts_via_presigned_urls as _upload_parts_via_presigne
 from .utils import complete_upload_via_complete_url as _complete_upload_via_complete_url
 from .utils import upload_file as _upload_file
 
-from .utils import b2_upload_part as _b2_upload_part
-from .utils import b2_list_folders as _b2_list_folders
-from .utils import b2_list_multipart_uploads as _b2_list_multipart_uploads
-
 class CloudreveClient:
     def __init__(self):
         self.base_url = None
@@ -88,10 +84,6 @@ class CloudreveClient:
     upload_parts_via_presigned_urls = _upload_parts_via_presigned_urls
     complete_upload_via_complete_url = _complete_upload_via_complete_url
     upload_file = _upload_file
-
-    b2_upload_part = _b2_upload_part
-    b2_list_folders = _b2_list_folders
-    b2_list_multipart_uploads = _b2_list_multipart_uploads
 
     async def close(self):
         await self.conn.aclose()
