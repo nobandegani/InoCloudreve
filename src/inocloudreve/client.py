@@ -28,6 +28,8 @@ from .utils import save_url_as_file as _save_url_as_file
 from .utils import read_file_as_bytes as _read_file_as_bytes
 from .utils import get_headers as _get_headers
 
+from .utils import download_file as _download_file
+
 from .utils import upload_parts_via_presigned_urls as _upload_parts_via_presigned_urls
 from .utils import complete_upload_via_complete_url as _complete_upload_via_complete_url
 from .utils import upload_file as _upload_file
@@ -80,6 +82,8 @@ class CloudreveClient:
     save_url_as_file = _save_url_as_file
     read_file_as_bytes = _read_file_as_bytes
     get_headers = _get_headers
+
+    download_file = _download_file
 
     upload_parts_via_presigned_urls = _upload_parts_via_presigned_urls
     complete_upload_via_complete_url = _complete_upload_via_complete_url
