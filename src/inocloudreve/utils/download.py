@@ -12,10 +12,13 @@ async def download_file(
     if not get_url_res["success"]:
         return {
             "success": get_url_res["success"],
-            "status_code": get_url_res["status_code"],
             "msg": get_url_res["msg"],
-            "code": get_url_res["code"],
-            "get_url_res": get_url_res
+            "get_url_res": get_url_res,
+            "save_file_res": {},
+            "url": "",
+            "file_name": "",
+            "extension": "",
+            "path": ""
         }
     url = get_url_res["url"]
     file_name = get_url_res["file_name"]
@@ -30,18 +33,18 @@ async def download_file(
     if not save_file_res["success"]:
         return {
             "success": save_file_res["success"],
-            "status_code": save_file_res["status_code"],
             "msg": save_file_res["msg"],
-            "code": save_file_res["code"],
             "get_url_res": get_url_res,
-            "save_file_res": save_file_res
+            "save_file_res": save_file_res,
+            "url": url,
+            "file_name": file_name,
+            "extension": extension,
+            "path": ""
         }
 
     return {
-        "success": save_file_res["success"],
-        "status_code": save_file_res["status_code"],
-        "msg": save_file_res["msg"],
-        "code": save_file_res["code"],
+        "success": True,
+        "msg": "file downloaded and saved successfully.",
         "get_url_res": get_url_res,
         "save_file_res": save_file_res,
         "url": url,
