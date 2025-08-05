@@ -45,6 +45,16 @@ async def get_last_folder_or_file(
             "last": None,
             "last_name": None
         }
+    if not result["files"]:
+        return {
+            "success": result["success"],
+            "status_code": result["status_code"],
+            "msg": "Files or folders empty",
+            "code": result["code"],
+            "data": result,
+            "last": None,
+            "last_name": None
+        }
 
     return {
         "success": result["success"],
