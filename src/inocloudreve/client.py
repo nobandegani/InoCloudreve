@@ -22,6 +22,8 @@ from .upload import delete_upload_session as _delete_upload_session
 
 from .callback import complete_s3_upload as _complete_s3_upload
 
+from .workflow import extract_archive as _extract_archive
+
 from .utils import is_token_valid as _is_token_valid
 from .utils import validate_token as _validate_token
 from .utils import save_url_as_file as _save_url_as_file
@@ -76,6 +78,8 @@ class CloudreveClient:
     delete_upload_session = _delete_upload_session
 
     complete_s3_upload = _complete_s3_upload
+
+    extract_archive = _extract_archive
 
     is_token_valid = _is_token_valid
     validate_token = _validate_token
