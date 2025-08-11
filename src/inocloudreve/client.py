@@ -39,24 +39,38 @@ from .utils import upload_file as _upload_file
 class CloudreveClient:
     def __init__(self):
         self.base_url = None
-        self.conn = None
-        self.timeout = httpx.Timeout(600, read=600, write=600)
+        self.api_conn = None
+        self.upload_conn = None
+
+        self.api_timeout = httpx.Timeout(connect=10.0, read=30, write=30, pool=10.0)
+        self.api_limits = httpx.Limits(max_connections=8, max_keepalive_connections=8, keepalive_expiry=60.0)
+        self.api_headers = {
+                "Connection": "keep-alive",
+                "User-Agent": "inocloudreve (+https://github.com/nobandegani/InoCloudreve)"
+            }
+
+        self.upload_timeout = httpx.Timeout(connect=10, read=900, write=900, pool=60.0)
+        self.upload_limits = httpx.Limits(max_connections=32, max_keepalive_connections=32, keepalive_expiry=120.0)
+
         self.email = None
         self.password = None
         self.user_info= None
         self.token = None
-        self.b2_access_key_id = None
-        self.b2_access_key_secret = None
-        self.b2_region = None
-        self.b2_bucket_name = None
 
-    def init(self, base_url: str, b2_access_key_id: str = "", b2_access_key_secret: str = "", b2_region: str = "us-west-004", b2_bucket_name: str = "InoDrive"):
+    def init(self, base_url: str):
         self.base_url = base_url.rstrip('/')
-        self.conn = httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout)
-        self.b2_access_key_id = b2_access_key_id
-        self.b2_access_key_secret = b2_access_key_secret
-        self.b2_region = b2_region
-        self.b2_bucket_name = b2_bucket_name
+        self.api_conn = httpx.AsyncClient(
+            base_url=self.base_url,
+            timeout=self.api_timeout,
+            limits=self.api_limits,
+            headers=self.api_headers,
+            http2=True,
+        )
+        self.upload_conn = httpx.AsyncClient(
+            timeout=self.upload_timeout,
+            limits=self.upload_limits,
+            http2=True,
+        )
 
     ping = _ping
 
@@ -94,4 +108,7 @@ class CloudreveClient:
     upload_file = _upload_file
 
     async def close(self):
-        await self.conn.aclose()
+        if self.api_conn:
+            await self.api_conn.aclose()
+        if self.upload_conn:
+            await self.upload_conn.aclose()

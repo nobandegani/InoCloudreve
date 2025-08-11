@@ -30,7 +30,7 @@ async def upload_parts_via_presigned_urls(
         try:
             print(f"Uploading part {idx}/{len(parts)} ({len(chunk)} bytes)…")
             headers = {"Content-Length": str(len(chunk))}
-            resp = await self.conn.put(url, content=chunk, headers=headers)
+            resp = await self.upload_conn.put(url, content=chunk, headers=headers)
             last_status = resp.status_code
 
             tag = resp.headers.get("ETag")
@@ -89,8 +89,8 @@ async def complete_upload_via_complete_url(
             "msg": str
         }
     """
-    S3_NS = "http://s3.amazonaws.com/doc/2006-03-01/"
-    root = ET.Element("CompleteMultipartUpload", xmlns=S3_NS)
+    s3_ns = "http://s3.amazonaws.com/doc/2006-03-01/"
+    root = ET.Element("CompleteMultipartUpload", xmlns=s3_ns)
 
     for idx, tag in enumerate(etags, start=1):
         part = ET.SubElement(root, "Part")
@@ -99,7 +99,7 @@ async def complete_upload_via_complete_url(
     xml_body = ET.tostring(root, encoding="utf-8", xml_declaration=False)
 
     try:
-        resp = await self.conn.post(
+        resp = await self.api_conn.post(
             complete_url,
             headers={
                 "Content-Type": "application/xml",
@@ -124,10 +124,10 @@ async def complete_upload_via_complete_url(
     try:
         tree = ET.fromstring(resp.text)
 
-        bucket = tree.find(f".//{{{S3_NS}}}Bucket").text
-        etag_val = tree.find(f".//{{{S3_NS}}}ETag").text
-        key = tree.find(f".//{{{S3_NS}}}Key").text
-        location = tree.find(f".//{{{S3_NS}}}Location").text
+        bucket = tree.find(f".//{{{s3_ns}}}Bucket").text
+        etag_val = tree.find(f".//{{{s3_ns}}}ETag").text
+        key = tree.find(f".//{{{s3_ns}}}Key").text
+        location = tree.find(f".//{{{s3_ns}}}Location").text
     except Exception as exc:
         return {
             "success": False,
