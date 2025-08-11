@@ -13,7 +13,7 @@ async def refresh_token(self) -> dict:
         }
     """
     try:
-        resp = await self.conn.post(
+        resp = await self.api_conn.post(
             "/session/token/refresh", json={"refresh_token": self.token.get("refresh_token")}
         )
         resp.raise_for_status()

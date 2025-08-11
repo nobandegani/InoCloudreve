@@ -67,7 +67,7 @@ async def create_upload_session(
         payload["entity_type"] = entity_type
 
     try:
-        resp = await self.conn.put("/file/upload", json=payload, headers=self.get_headers())
+        resp = await self.api_conn.put("/file/upload", json=payload, headers=self.get_headers())
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

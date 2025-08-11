@@ -54,7 +54,7 @@ async def extract_archive(
 
     headers = self.get_headers()
     try:
-        resp = await self.conn.post("/workflow/extract", json=payload, headers=headers)
+        resp = await self.api_conn.post("/workflow/extract", json=payload, headers=headers)
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

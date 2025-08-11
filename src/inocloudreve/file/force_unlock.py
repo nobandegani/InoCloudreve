@@ -31,7 +31,7 @@ async def force_unlock(
     payload = {"tokens": tokens}
 
     try:
-        resp = await self.conn.request("DELETE", "/file/lock", json=payload, headers=self.get_headers(False, True))
+        resp = await self.api_conn.request("DELETE", "/file/lock", json=payload, headers=self.get_headers(False, True))
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

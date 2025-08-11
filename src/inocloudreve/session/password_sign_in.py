@@ -31,7 +31,7 @@ async def password_sign_in(
         payload["ticket"] = ticket
 
     try:
-        resp = await self.conn.post("/session/token", json=payload)
+        resp = await self.api_conn.post("/session/token", json=payload)
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

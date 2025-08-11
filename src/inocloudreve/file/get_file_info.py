@@ -47,7 +47,7 @@ async def get_file_info(
         params["folder_summary"] = folder_summary
 
     try:
-        resp = await self.conn.get("/file/info", params=params, headers=self.get_headers(True, False))
+        resp = await self.api_conn.get("/file/info", params=params, headers=self.get_headers(True, False))
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

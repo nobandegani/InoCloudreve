@@ -43,7 +43,7 @@ async def update_file_content(
         params["previous"] = previous
 
     try:
-        resp = await self.conn.put(
+        resp = await self.api_conn.put(
             "/file/content",
             params=params,
             headers=headers,

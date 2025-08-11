@@ -35,7 +35,7 @@ async def delete_upload_session(
     payload = {"id": session_id, "uri": init_uri + uri}
 
     try:
-        resp = await self.conn.request("DELETE", "/file/upload", json=payload, headers=self.get_headers())
+        resp = await self.api_conn.request("DELETE", "/file/upload", json=payload, headers=self.get_headers())
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

@@ -28,7 +28,7 @@ async def complete_s3_upload(
     path = f"/callback/s3/{session_id}/{Path(key_id).name.split("_", 1)[0]}"
 
     try:
-        resp = await self.conn.get(path)
+        resp = await self.api_conn.get(path)
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

@@ -44,7 +44,7 @@ async def save_url_as_file(
         }
 
     try:
-        resp = await self.conn.get(url)
+        resp = await self.api_conn.get(url)
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

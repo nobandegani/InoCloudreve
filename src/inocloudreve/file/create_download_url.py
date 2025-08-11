@@ -80,7 +80,7 @@ async def create_download_url(
         payload["no_cache"] = no_cache
 
     try:
-        resp = await self.conn.post("/file/url", json=payload, headers=self.get_headers())
+        resp = await self.api_conn.post("/file/url", json=payload, headers=self.get_headers())
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

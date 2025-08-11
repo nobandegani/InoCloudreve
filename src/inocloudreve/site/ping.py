@@ -2,7 +2,7 @@ import httpx
 
 async def ping(self) -> dict:
     try:
-        resp = await self.conn.get("/site/ping")
+        resp = await self.api_conn.get("/site/ping")
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {

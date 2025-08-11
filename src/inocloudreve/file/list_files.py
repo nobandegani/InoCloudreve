@@ -58,7 +58,7 @@ async def list_files(
         params["next_page_token"] = next_page_token
 
     try:
-        resp = await self.conn.get("/file", params=params, headers=self.get_headers(True, False))
+        resp = await self.api_conn.get("/file", params=params, headers=self.get_headers(True, False))
         resp.raise_for_status()
     except httpx.RequestError as exc:
         return {
