@@ -40,10 +40,11 @@ class CloudreveClient:
     def __init__(self):
         self.base_url = None
         self.api_conn = None
+        self.download_conn = None
         self.upload_conn = None
 
-        self.api_timeout = httpx.Timeout(connect=10.0, read=30, write=30, pool=10.0)
-        self.api_limits = httpx.Limits(max_connections=8, max_keepalive_connections=8, keepalive_expiry=60.0)
+        self.api_timeout = httpx.Timeout(connect=10.0, read=60, write=60, pool=10.0)
+        self.api_limits = httpx.Limits(max_connections=8, max_keepalive_connections=8, keepalive_expiry=120.0)
         self.api_headers = {
                 "Connection": "keep-alive",
                 "User-Agent": "inocloudreve (+https://github.com/nobandegani/InoCloudreve)"
@@ -51,6 +52,9 @@ class CloudreveClient:
 
         self.upload_timeout = httpx.Timeout(connect=10, read=900, write=900, pool=60.0)
         self.upload_limits = httpx.Limits(max_connections=32, max_keepalive_connections=32, keepalive_expiry=120.0)
+
+        self.download_timeout = httpx.Timeout(connect=10, read=900, write=900, pool=60.0)
+        self.download_limits = httpx.Limits(max_connections=32, max_keepalive_connections=32, keepalive_expiry=120.0)
 
         self.email = None
         self.password = None
@@ -64,6 +68,11 @@ class CloudreveClient:
             timeout=self.api_timeout,
             limits=self.api_limits,
             headers=self.api_headers,
+            http2=True,
+        )
+        self.download_conn = httpx.AsyncClient(
+            timeout=self.download_timeout,
+            limits=self.download_limits,
             http2=True,
         )
         self.upload_conn = httpx.AsyncClient(
