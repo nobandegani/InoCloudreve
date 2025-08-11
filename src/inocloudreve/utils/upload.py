@@ -1,10 +1,12 @@
+import asyncio
 import httpx
 import xml.etree.ElementTree as ET
 
 async def upload_parts_via_presigned_urls(
     self,
     upload_urls: list[str],
-    parts: list[bytes]
+    parts: list[bytes],
+    concurrent: int = 4
 ) -> dict:
     """
     Upload each part of a multipart upload using the presigned URLs
@@ -22,52 +24,70 @@ async def upload_parts_via_presigned_urls(
             "msg": str
         }
     """
-    last_status = None
 
-    etags = []
+    if not upload_urls or len(upload_urls) != len(parts):
+        return {
+            "success": False,
+            "status_code": None,
+            "msg": "upload_urls and parts must be same non-zero length",
+        }
 
-    for idx, (url, chunk) in enumerate(zip(upload_urls, parts), start=1):
-        try:
+    n = len(parts)
+    # multi-part: upload [0..n-2] with concurrency=4, then upload last (n-1)
+    last_idx = n - 1
+    etags: list[str | None] = [None] * n
+    last_status: int | None = None
+
+    sem = asyncio.Semaphore(concurrent)
+
+    async def put_part(idx: int) -> int:
+        url = upload_urls[idx]
+        chunk = parts[idx]
+        headers = {"Content-Length": str(len(chunk))}
+        async with sem:
             print(f"Uploading part {idx}/{len(parts)} ({len(chunk)} bytes)…")
-            headers = {"Content-Length": str(len(chunk))}
             resp = await self.upload_conn.put(url, content=chunk, headers=headers)
-            last_status = resp.status_code
+            resp.raise_for_status()
+            etags[idx] = resp.headers.get("ETag")
+            print(f"Part {idx} uploaded successfully: {resp.status_code}")
+            return resp.status_code
 
-            tag = resp.headers.get("ETag")
-            etags.append(tag)
+    tasks = [asyncio.create_task(put_part(i)) for i in range(0, last_idx)]
+    try:
+        print(f"Start uploading {n} parts")
+        statuses = await asyncio.gather(*tasks)
+        if statuses:
+            last_status = statuses[-1]
+    except Exception as exc:
+        for t in tasks:
+            if not t.done():
+                t.cancel()
+        return {
+            "success": False,
+            "status_code": None,
+            "msg": f"Part upload error: {exc}",
+        }
 
-        except httpx.RequestError as exc:
-            return {
-                "success": False,
-                "status_code": None,
-                "msg": f"Request error: {exc}"
-            }
-        except httpx.HTTPStatusError as exc:
-            return {
-                "success": False,
-                "status_code": exc.response.status_code,
-                "msg": f"Part {idx} failed HTTP {exc.response.status_code}"
-            }
-        except httpx.ReadTimeout:
-            return {
-                "success": False,
-                "status_code": None,
-                "msg": f"Part {idx} timed out"
-            }
-        except Exception as exc:
-            return {
-                "success": False,
-                "status_code": None,
-                "msg": f"Part {idx} error: {exc!r}"
-            }
-
+    # upload the final part after all previous ones succeeded
+    try:
+        last_status = await put_part(last_idx)
+    except httpx.RequestError as exc:
+        return {"success": False, "status_code": None, "msg": f"Request error (last part): {exc}"}
+    except httpx.HTTPStatusError as exc:
+        return {"success": False, "status_code": exc.response.status_code,
+                "msg": f"Last part failed HTTP {exc.response.status_code}"}
+    except httpx.ReadTimeout:
+        return {"success": False, "status_code": None, "msg": "Last part timed out"}
+    except Exception as exc:
+        return {"success": False, "status_code": None, "msg": f"Last part error: {exc!r}"}
 
     return {
         "success": True,
         "status_code": last_status,
-        "msg": f"Uploaded {len(parts)} parts successfully",
-        "etags": etags
+        "msg": f"Uploaded {n} parts successfully",
+        "etags": etags,
     }
+
 
 async def complete_upload_via_complete_url(
     self,
