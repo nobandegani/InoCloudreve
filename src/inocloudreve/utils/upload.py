@@ -16,6 +16,7 @@ async def upload_parts_via_presigned_urls(
         self: CloudreveClient instance
         upload_urls: list of presigned PUT URLs (one per part)
         parts:       list of byte-chunks (same length as upload_urls)
+        concurrent: number of concurrent uploads
 
     Returns:
         {
@@ -33,7 +34,6 @@ async def upload_parts_via_presigned_urls(
         }
 
     n = len(parts)
-    # multi-part: upload [0..n-2] with concurrency=4, then upload last (n-1)
     last_idx = n - 1
     etags: list[str | None] = [None] * n
     last_status: int | None = None
@@ -68,7 +68,6 @@ async def upload_parts_via_presigned_urls(
             "msg": f"Part upload error: {exc}",
         }
 
-    # upload the final part after all previous ones succeeded
     try:
         last_status = await put_part(last_idx)
     except httpx.RequestError as exc:
@@ -119,7 +118,7 @@ async def complete_upload_via_complete_url(
     xml_body = ET.tostring(root, encoding="utf-8", xml_declaration=False)
 
     try:
-        resp = await self.api_conn.post(
+        resp = await self.upload_conn.post(
             complete_url,
             headers={
                 "Content-Type": "application/xml",
@@ -238,7 +237,8 @@ async def upload_file(
     upload_urls = session_resp["upload_urls"]
     upload_parts_resp = await self.upload_parts_via_presigned_urls(
         upload_urls=upload_urls,
-        parts=file_parts
+        parts=file_parts,
+        concurrent=6
     )
     if not upload_parts_resp["success"]:
         return {

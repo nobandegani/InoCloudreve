@@ -50,11 +50,11 @@ class CloudreveClient:
                 "User-Agent": "inocloudreve (+https://github.com/nobandegani/InoCloudreve)"
             }
 
-        self.upload_timeout = httpx.Timeout(connect=10, read=900, write=900, pool=60.0)
-        self.upload_limits = httpx.Limits(max_connections=32, max_keepalive_connections=32, keepalive_expiry=120.0)
+        self.upload_timeout = httpx.Timeout(connect=10, read=900, write=900, pool=120.0)
+        self.upload_limits = httpx.Limits(max_connections=32, max_keepalive_connections=32, keepalive_expiry=300.0)
 
-        self.download_timeout = httpx.Timeout(connect=10, read=900, write=900, pool=60.0)
-        self.download_limits = httpx.Limits(max_connections=32, max_keepalive_connections=32, keepalive_expiry=120.0)
+        self.download_timeout = httpx.Timeout(connect=10, read=900, write=900, pool=120.0)
+        self.download_limits = httpx.Limits(max_connections=32, max_keepalive_connections=32, keepalive_expiry=300.0)
 
         self.email = None
         self.password = None
