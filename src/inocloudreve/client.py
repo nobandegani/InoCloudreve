@@ -69,16 +69,22 @@ class CloudreveClient:
             limits=self.api_limits,
             headers=self.api_headers,
             http2=True,
+            trust_env=False,
+            follow_redirects=False
         )
         self.download_conn = httpx.AsyncClient(
             timeout=self.download_timeout,
             limits=self.download_limits,
             http2=True,
+            trust_env=False,
+            follow_redirects=False
         )
         self.upload_conn = httpx.AsyncClient(
             timeout=self.upload_timeout,
             limits=self.upload_limits,
             http2=True,
+            trust_env=False,
+            follow_redirects=False
         )
 
     ping = _ping
